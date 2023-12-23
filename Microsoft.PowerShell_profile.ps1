@@ -1,5 +1,6 @@
 Import-Module $PSScriptRoot\modules\path.psm1
 Import-Module $PSScriptRoot\modules\emoji_clock.psm1
+Import-Module $PSScriptRoot\modules\say.psm1
 
 # PowerShellだとwhereに.exeつけないと動かない。linuxと同じくwhichで動くようにしておく
 Set-Alias which where.exe
@@ -34,27 +35,6 @@ function prompt() {
   # ホームディレクトリは「~」に置換
   $d = (Get-Location).Path.Replace($HOME, "~")
   "$(clockEmojiNow) $($d)> "
-}
-
-function say {
-  param(
-    [Parameter(ValueFromPipeline = $true)]
-    [string]$InputString
-  )
-
-  process {
-    if (!$synth) {
-      Add-Type -AssemblyName System.Speech
-      $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
-      $synth.Rate = 2
-    }
-    if ($InputString) {
-      $synth.Speak($InputString)
-    }
-    else {
-      Write-Host "文字列を渡してください"
-    }
-  }
 }
 
 function Get-SystemInfo {
