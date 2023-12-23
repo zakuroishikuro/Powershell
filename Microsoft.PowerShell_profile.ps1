@@ -1,6 +1,7 @@
-Import-Module $PSScriptRoot\modules\path.psm1
-Import-Module $PSScriptRoot\modules\emoji_clock.psm1
-Import-Module $PSScriptRoot\modules\say.psm1
+# ./modules/ 配下のモジュールを読み込む
+Get-ChildItem "$PSScriptRoot\modules" -Filter *.psm1 | % {
+  Import-Module $_.FullName
+}
 
 # PowerShellだとwhereに.exeつけないと動かない。linuxと同じくwhichで動くようにしておく
 Set-Alias which where.exe
