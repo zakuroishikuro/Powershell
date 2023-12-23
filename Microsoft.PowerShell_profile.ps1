@@ -1,20 +1,8 @@
 Import-Module $PSScriptRoot\modules\path.psm1
+Import-Module $PSScriptRoot\modules\emoji_clock.psm1
 
 # PowerShellだとwhereに.exeつけないと動かない。linuxと同じくwhichで動くようにしておく
 Set-Alias which where.exe
-
-function clockEmojiNow {
-  $now = Get-Date
-  clockEmoji $now.Hour $now.Minute
-}
-
-function clockEmoji($h, $m) {
-  $h = $h % 12
-  $code = 128335
-  $code += $h -ne 0 ? $h : 12
-  $code += $m -lt 30 ? 0 : 12
-  [char]::ConvertFromUtf32($code)
-}
 
 function rotateClock {
   $delayMs = 100
