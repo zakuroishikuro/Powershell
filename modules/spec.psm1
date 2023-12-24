@@ -26,12 +26,43 @@ function Show-Spec {
     "$([Math]::Ceiling($bytes / 1MB))MB"
   }
 
+  # https://learn.microsoft.com/en-us/dotnet/api/microsoft.powershell.commands.pcsystemtypeex?view=powershellsdk-1.1.0
+  function sysTypeEXStr([int]$sysTypeExNum) {
+    @{
+      0 = 'Unspecified';
+      1 = 'Desktop';
+      2 = 'Mobile';
+      3 = 'Workstation';
+      4 = 'Enterprise Server';
+      5 = 'SOHO Server';
+      6 = 'Appliance PC';
+      7 = 'Performance Server';
+      8 = 'SLATE';
+      9 = 'Maximum';
+    }[$sysTypeExNum]
+  }
+
+  # https://learn.microsoft.com/ja-jp/windows/win32/cimwin32prov/win32-processor#properties
+  function cpuArchStr([int]$cpuArchNum) {
+    @{
+      0  = 'x86';
+      1  = 'MIPS';
+      2  = 'Alpha';
+      3  = 'PowerPC';
+      5  = 'ARM';
+      6  = 'ia64';
+      9  = 'x64';
+      12 = 'ARM64';
+    }[$cpuArchNum]
+  }
+
   $comp = Get-CimInstance CIM_ComputerSystem
   $bios = Get-CimInstance CIM_BIOSElement
   Write-Output @(
-    "* SystemFamily: $($comp.SystemFamily.trim())"
-    "  * Model: $($comp.Model.trim())"
+    "* Model: $($comp.Model.trim())"
     "  * Manufacturer: $($comp.Manufacturer.trim())"
+    "  * SystemFamily: $($comp.SystemFamily.trim())"
+    "  * Type: $(sysTypeEXStr $comp.PCSystemTypeEX)"
     "  * BIOS: $($bios.Name.trim()) (Version: $($bios.Version.trim()))"
   )
 
@@ -44,7 +75,7 @@ function Show-Spec {
 
   $cpu = Get-CimInstance CIM_Processor
   Write-Output @(
-    "* CPU: $($cpu.Name.trim())"
+    "* CPU: $($cpu.Name.trim()) (Arch: $(cpuArchStr $cpu.Architecture))"
     "  * Max: $($cpu.MaxClockSpeed / 1000) GHz"
     "  * Cores: $($cpu.NumberOfCores) ($($cpu.ThreadCount) Threads)"
     "  * Cache Size: L2 $(mb ($cpu.L2CacheSize * 1KB)), L3 $(mb ($cpu.L3CacheSize * 1KB))"
