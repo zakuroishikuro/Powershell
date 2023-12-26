@@ -33,6 +33,9 @@ function chatgpt($message) {
     content = $responsedMessage
   }
   Write-Output $responsedMessage ""
+
+  # ログに保存
+  $script:ChatGptMessages | ConvertTo-Json | Out-File $script:chat_log_file -Encoding utf8
 }
 
 function chat($messageArg) {
@@ -62,6 +65,10 @@ function chat_init {
       content = $SYSTEM_CONTENT
     }
   )
+  $timestamp = (Get-Date).ToString("yyyyMMddHHmmss")
+  $guid = (new-guid).guid
+  $dir = (gi $profile).DirectoryName
+  $script:chat_log_file = "$dir\chat-log\chat-$timestamp-$guid.json"
 }
 
 function chat_history {
