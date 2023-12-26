@@ -1,5 +1,10 @@
-function gpt($message) {
-  $apiKey = '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'
+function chat($message) {
+  $apiKey = $env:CHAT_GPT_API_KEY
+  if ($apiKey -eq $null) {
+    Write-Output "CHAT_GPT_API_KEY is not set."
+    return
+  }
+
   $uri = "https://api.openai.com/v1/chat/completions"
 
   $headers = @{
