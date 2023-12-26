@@ -1,6 +1,13 @@
+$global:ChatGptMessages = @(
+  @{
+    role    = "system"
+    content = "You are a helpful assistant."
+  }
+)
+
 function chat($message) {
   $apiKey = $env:CHAT_GPT_API_KEY
-  if ($apiKey -eq $null) {
+  if ($null -eq $apiKey) {
     Write-Output "CHAT_GPT_API_KEY is not set."
     return
   }
@@ -12,21 +19,25 @@ function chat($message) {
     "Content-Type"  = "application/json"
   }
 
+  # 返答をpushする
+  $global:ChatGptMessages += @{
+    role    = "user"
+    content = $message
+  }
+
   $body = @{
     model    = "gpt-3.5-turbo"
-    messages = @(
-      @{
-        role    = "system"
-        content = "You are a helpful assistant."
-      },
-      @{
-        role    = "user"
-        content = $message
-      }
-    )
+    messages = $global:ChatGptMessages
   } | ConvertTo-Json
+
+  
 
   $response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
 
-  Write-Output $response.choices[0].message.content ""
+  $responsedMessage = $response.choices[0].message.content
+  $global:ChatGptMessages += @{
+    role    = "system"
+    content = $responsedMessage
+  }
+  Write-Output $responsedMessage ""
 }
