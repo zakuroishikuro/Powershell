@@ -1,4 +1,11 @@
-$SYSTEM_CONTENT = "You are a helpful assistant."
+$DEFAULT_MESSAGE = @(
+  @{
+    role    = "system"
+    content = "You are a helpful assistant."
+  }
+)
+
+$script:chat_model = "gpt-3.5-turbo"
 
 function chatgpt($message) {
   $apiKey = $env:CHAT_GPT_API_KEY
@@ -21,7 +28,7 @@ function chatgpt($message) {
   }
 
   $body = @{
-    model    = "gpt-3.5-turbo"
+    model    = $script:chat_model
     messages = $script:ChatGptMessages
   } | ConvertTo-Json
 
@@ -34,8 +41,13 @@ function chatgpt($message) {
   }
   Write-Output $responsedMessage ""
 
-  # ログに保存
-  $script:ChatGptMessages | ConvertTo-Json | Out-File $script:chat_log_file -Encoding utf8
+  # ログをmarkdownで出力
+  $script:chat_model + "`n`n" | Out-File $script:chat_log_file
+  $script:ChatGptMessages | ForEach-Object {
+    $role = $_.role
+    $content = $_.Content
+    "# $role :`n$content`n"
+  } | Out-File $script:chat_log_file -Append
 }
 
 function chat($messageArg) {
@@ -58,17 +70,24 @@ function chat($messageArg) {
   }
 }
 
+function chat_model ($model) {
+  # $modelに4を含んでいれば"gpt-4 turbo", それ以外なら"gpt-3.5-turbo"
+  $script:chat_model = $model -like "*4*" ? "gpt-4" : "gpt-3.5-turbo"
+  Write-Output " * model: $script:chat_model"
+}
+
+function chat_new ($message) {
+  chat_init
+  chat $message
+}
+
 function chat_init {
-  $script:ChatGptMessages = @(
-    @{
-      role    = "system"
-      content = $SYSTEM_CONTENT
-    }
-  )
+  $script:ChatGptMessages = $DEFAULT_MESSAGE.Clone()
+
   $timestamp = (Get-Date).ToString("yyyyMMddHHmmss")
   $guid = (new-guid).guid
-  $dir = (gi $profile).DirectoryName
-  $script:chat_log_file = "$dir\chat-log\chat-$timestamp-$guid.json"
+  $dir = (Get-Item $profile).DirectoryName
+  $script:chat_log_file = "$dir\chat-log\chat-$timestamp-$guid.md"
 }
 
 function chat_history {
