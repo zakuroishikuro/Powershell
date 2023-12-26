@@ -2,7 +2,7 @@
 Get-ChildItem "$PSScriptRoot\modules" -Filter *.psm1 | ForEach-Object { Import-Module $_.FullName }
 
 # 環境変数の読み込み
-.\.env.ps1
+Invoke-Expression $PSScriptRoot\.env.ps1
 
 Set-Alias open explorer.exe
 Set-Alias which where.exe
